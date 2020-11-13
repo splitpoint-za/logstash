@@ -15,7 +15,7 @@ filter {
             "message", "^(?<c_ip>[^\s]+)\s+(?<c_port>[^\s]+)\s+(?<c_first_abs>[^\s]+)\s+(?<c_durat>[^\s]+)\s+(?<c_bytes_all>[^\s]+)\s+(?<c_pkts_all>[^\s]+)\s+(?<c_isint>[^\s]+)\s+(?<c_iscrypto>[^\s]+)\s+(?<c_type>[^\s]+)\s+(?<s_ip>[^\s]+)\s+(?<s_port>[^\s]+)\s+(?<s_first_abs>[^\s]+)\s+(?<s_durat>[^\s]+)\s+(?<s_bytes_all>[^\s]+)\s+(?<s_pkts_all>[^\s]+)\s+(?<s_isint>[^\s]+)\s+(?<s_iscrypto>[^\s]+)\s+(?<s_type>[^\s]+)\s+(?<fqdn>[^\s]+)\s+(?<quic_SNI>[^\s]+)\s+(?<quic_UA>[^\s]+)\s+(?<quic_CHLO>[^\s]+)\s+(?<quic_REJ>[\d+]+)$",
             "message", "^(?<path>[^\s]+)\s+(?<c_ip>[^\t]+)\t+(?<c_port>[^\t]+)\t+(?<s_ip>[^\t]+)\t+(?<s_port>[^\t]+)\t+(?<time_abs>[^\t]+)\t+(?<METHOD>[^\t]+)\t+(?<HOSTNAME>[^\t]+)\t+(?<FQDN>[^\t]+)\t+(?<HTTP_PATH>[^\t]+)\t+(?<REFERER>[^\t]+)\t+(?<USER_AGENT>[^\t]+)\t+(?<COOKIE>[^\t]+)\t+(?<DNT>[^\t]+)$",
             "message", "(?<value>\d+)\s+(?<count>\d+)$",
-            "path", "\/(?<capture_interface>[^\/]+)\/(?<date>[^\/]+).out\/(?<munate>[^\/]+)\/(?<histo_name>\w+)$"
+            "source", "\/(?<capture_interface>[^\/]+)\/(?<date>[^\/]+).out\/(?<munate>[^\/]+)\/(?<histo_name>\w+)$"
             ]
   }
   if "HTTP" in [METHOD] {
@@ -43,21 +43,36 @@ filter {
     add_field => { "dnt" => "%{DNT}" }
     }
   }
+
   mutate {
     remove_field => ["METHOD", "HOSTNAME", "FQDN", "HTTP_PATH", "REFERER", "USER_AGENT", "COOKIE", "DNT"]
   }
-
-  if "[fields][[tstat_type]" =~ "histogram" {
+  if [c_first_abs] {
+    grok {
+      tag_on_failure => []
+      break_on_match => false
+      match => ["c_first_abs",  "^(?<timestamp_s>[^.]+.\d{2})"]
+      }
+  }
+  if [munate] and [capture_interface] {
+     date {
+       match => ["date", "YYYY_MM_dd_HH_mm"]
+       target => "date"
+    }
+  
+  # The 60 we multiple by is for the new capture interval time.
   ruby {
-    code => "event.set('unix_time', event.get('date').to_i.to_s)
-            (event.set('timstamp', event.get('munate') * 60) + event.get(unix_time))"
-   }
-   }
-
+    code => "
+        event.set('unix_time', event.get('date').to_i)
+        event.set('timstamp', (60 * event.get('munate').to_i) + event.get('unix_time'))"
+        }
+    }
+ 
 mutate {
   convert => [
     "s_port", "integer",
     "c_port", "integer",
+    "timestamp_s", "integer",
     "time_abs", "integer",
     "munate", "integer",
     "value", "integer",
@@ -276,9 +291,9 @@ date {
   match => ["first", "UNIX_MS", "UNIX"]
   }
  }
- if [c_first_abs] {
+ if [timestamp_s] {
  date {
-   match => ["c_first_abs", "UNIX_MS", "UNIX"]
+   match => ["timestamp_s", "UNIX_MS", "UNIX"]
     }
   }
   if [time_abs] {
@@ -286,11 +301,23 @@ date {
     match => ["time_abs", "UNIX_MS", "UNIX"]
      }
   }
-  if [timstamp] {
+  if [timestamp] {
   date {
-    match => ["timstamp", "UNIX_MS", "UNIX"]
+    match => ["timestamp", "UNIX_MS", "UNIX"]
      }
   }
+# Remove filebeats default fields.
+mutate {
+  remove_field => [
+    "log",
+    "source",
+    "tags",
+    "host",
+    "input",
+    "beat",
+    "prospector",
+  ]
+}
  }
 
 output {
