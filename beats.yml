@@ -15,7 +15,7 @@ filter {
             "message", "^(?<c_ip>[^\s]+)\s+(?<c_port>[^\s]+)\s+(?<c_first_abs>[^\s]+)\s+(?<c_durat>[^\s]+)\s+(?<c_bytes_all>[^\s]+)\s+(?<c_pkts_all>[^\s]+)\s+(?<c_isint>[^\s]+)\s+(?<c_iscrypto>[^\s]+)\s+(?<c_type>[^\s]+)\s+(?<s_ip>[^\s]+)\s+(?<s_port>[^\s]+)\s+(?<s_first_abs>[^\s]+)\s+(?<s_durat>[^\s]+)\s+(?<s_bytes_all>[^\s]+)\s+(?<s_pkts_all>[^\s]+)\s+(?<s_isint>[^\s]+)\s+(?<s_iscrypto>[^\s]+)\s+(?<s_type>[^\s]+)\s+(?<fqdn>[^\s]+)\s+(?<quic_SNI>[^\s]+)\s+(?<quic_UA>[^\s]+)\s+(?<quic_CHLO>[^\s]+)\s+(?<quic_REJ>[\d+]+)$",
             "message", "^(?<path>[^\s]+)\s+(?<c_ip>[^\t]+)\t+(?<c_port>[^\t]+)\t+(?<s_ip>[^\t]+)\t+(?<s_port>[^\t]+)\t+(?<time_abs>[^\t]+)\t+(?<METHOD>[^\t]+)\t+(?<HOSTNAME>[^\t]+)\t+(?<FQDN>[^\t]+)\t+(?<HTTP_PATH>[^\t]+)\t+(?<REFERER>[^\t]+)\t+(?<USER_AGENT>[^\t]+)\t+(?<COOKIE>[^\t]+)\t+(?<DNT>[^\t]+)$",
             "message", "(?<value>\d+)\s+(?<count>\d+)$",
-            "message", "\/(?<capture_interface>[^\/]+)\/(?<date>[^\/]+).out\/(?<munate>[^\/]+)\/(?<histo_name>\w+)$"
+            "path", "\/(?<capture_interface>[^\/]+)\/(?<date>[^\/]+).out\/(?<munate>[^\/]+)\/(?<histo_name>\w+)$"
             ]
   }
   if "HTTP" in [METHOD] {
@@ -47,7 +47,7 @@ filter {
     remove_field => ["METHOD", "HOSTNAME", "FQDN", "HTTP_PATH", "REFERER", "USER_AGENT", "COOKIE", "DNT"]
   }
 
-  if [tstat_type] =~ "histogram" {
+  if "[fields][[tstat_type]" =~ "histogram" {
   ruby {
     code => "event.set('unix_time', event.get('date').to_i.to_s)
             (event.set('timstamp', event.get('munate') * 60) + event.get(unix_time))"
