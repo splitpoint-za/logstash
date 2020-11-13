@@ -1,0 +1,208 @@
+input {
+  exec {
+    command => "/usr/share/logstash/bin/platinumsiteslaperformance.sh"
+    schedule => "*/60 * * * * * UTC"
+    codec => multiline {
+      pattern => "\n"
+      what => "previous"
+    }
+  }
+}
+
+# Filter for site sla
+
+filter {
+  grok {
+   tag_on_failure => []
+   break_on_match => false
+   match => [
+            "message",  "probe_duration_seconds\{instance=\"(?<instance>[^\"]+)\",job=\"(?<job>[^\"]+)\"\} (?<response_time>[^\s]+) (?<epoch_millis>\d+)"
+            ]
+  } 
+  grok {
+   tag_on_failure => []
+   break_on_match => false
+   match => [
+            "instance",  "Plat_Health-(?<sitename>.*)-(?<interface>\d+):(?<dest_port>\d+)$"
+            ]
+  }
+  mutate {
+    add_field => {"amadate" => "true"}
+  }
+
+if [sitename] {
+    grok {
+      tag_on_failure => []
+      break_on_match => false
+      match => [
+            "sitename",  ".*-(?<org>[^-]+)$"
+            ]
+    }
+  }
+
+  mutate {
+    add_field => { "[@timestamp_logstash]" => "%{[@timestamp]}" }
+  }
+
+date {
+  match => [ "epoch_millis", "UNIX_MS" ]
+  timezone => "Africa/Johannesburg"
+  }
+  if [interface] != "0"{
+  drop {}
+  }
+fingerprint {
+  source => "message"
+  target => "[@metadata][fingerprint]"
+  method => "MD5"
+  key => "sla"
+ }
+ruby {
+  code => "event.set('[@metadata][tsprefix]', event.get('@timestamp').to_i.to_s(16))"
+ }
+  mutate {
+    add_field => {"[tbwweekday]" => "%{+e}"}
+    remove_field => ["message", "command", "path"]
+  }
+  mutate {
+    remove_field => [ "message",  "path" ]
+    add_field => {"amadate" => "true"}
+  }
+  grok {
+   tag_on_failure => []
+   break_on_match => false
+   match => [
+            "@timestamp",  "(?<week_hour>\d+):\d+:\d+.\d+Z"
+            ]
+  }
+if [amadate] {
+  translate {
+    dictionary_path => "/etc/logstash/conf.d/platinum/lookup_generator/total_sun_days.csv"
+    destination => "total_sun_days"
+    field => "amadate"
+    fallback => "unknown"
+    override => "true"
+   }
+
+  translate {
+    dictionary_path => "/etc/logstash/conf.d/platinum/lookup_generator/total_sat_days.csv"
+    destination => "total_sat_days"
+    field => "amadate"
+    fallback => "unknown"
+    override => "true"
+   }
+
+  translate {
+    dictionary_path => "/etc/logstash/conf.d/platinum/lookup_generator/total_work_days.csv"
+    destination => "total_work_days"
+    field => "amadate"
+    fallback => "unknown"
+    override => "true"
+   }
+
+  translate {
+    dictionary_path => "/etc/logstash/conf.d/platinum/lookup_generator/total_days_m.csv"
+    destination => "total_days_m"
+    field => "amadate"
+    fallback => "unknown"
+    override => "true"
+   }
+ }
+if [sitename] {
+  mutate {
+    add_field => { "siteName" => "%{sitename}"}
+    add_field => { "SCW" => "8-5. 0. 0"}
+    add_field => { "target" => "99.5%"}
+   }
+ }
+
+if "1" in [tbwweekday]  or "2" in [tbwweekday] or "3" in [tbwweekday] or "4" in [tbwweekday] or "5" in [tbwweekday]{
+  mutate {
+    add_field => {"week_s" => "6"}
+  }
+}
+if "1" in [tbwweekday]  or "2" in [tbwweekday] or "3" in [tbwweekday] or "4" in [tbwweekday] or "5" in [tbwweekday]{
+  mutate {
+    add_field => {"week_e" => "15"}
+  }
+}
+if [SCW] ==  "8-5. 0. 0"{
+  ruby {
+  code => "event.set('total_business_hours_temp', (event.get('total_work_days').to_i * 9) - 1)"
+    }
+  }
+if [week_s] {
+ruby {
+code => '
+event.set("weeks_s", event.get("week_s").to_i);
+event.set("weeks_e", event.get("week_e").to_i - 1);
+event.set("weeks_hour", event.get("week_hour").to_i);
+if  event.get("weeks_hour").to_i >= event.get("weeks_s").to_i and event.get("weeks_hour").to_i <= event.get("weeks_e").to_i
+event.set("businesshours", "true")
+end
+'
+ }
+}
+if![businesshours] {
+  mutate {
+        add_field => {"businesshours" => "false"}
+  }
+}
+
+if [total_business_hours_temp] {
+  mutate {
+    add_field => { "total_business_hours" => "%{total_business_hours_temp}:59:59"}
+    remove_field => ["total_days_m", "total_work_days", "total_sat_days", "total_sun_days", "total_days_m_t", "total_work_days_t", "total_sat_days_t", "total_sun_days_t", "total_business_hours_temp"]
+   }
+  }
+mutate {
+  remove_field => ["amadate", "tbwweekday", "week_hour", "weeks_hour"]
+ }
+
+
+mutate {
+  convert => [ 
+    "response_time", "integer",
+    "epoch_millis", "integer"
+   ]
+ }
+if [response_time] >= 5 {
+  mutate {
+    add_field => {"sla_track_app" => "1"}
+  }
+ }
+if [response_time] < 5 {
+  mutate {
+    add_field => {"sla_track_app" => "0"}
+  }
+ }
+mutate {
+  convert => [ 
+    "sla_track_app", "integer"
+   ]
+ }
+if [sla_track_app] == 1 {
+  drop {}
+ }
+}
+
+# Output to  Elasticsearch cluster
+output{
+#  stdout{codec=>rubydebug}
+  elasticsearch {
+    index => "logstash-platinum-sla-performance-%{+YYYY.MM.dd}"
+    hosts => ["196.9.88.116:9200", "196.9.88.117:9200", "196.9.88.118:9200"]
+    document_id => "%{[@metadata][tsprefix]}%{[@metadata][fingerprint]}"
+   }
+#    influxdb {                                                                                                                                                                                
+#      host => "192.168.26.104"                                                                                                                                                                      
+#      port => 8086                                                                                                                                                                              
+#      ssl => "false"                                                                                                                                                                            
+#      db => "logstashJDPsiteSLA"                                                                                                                                                                          
+#      codec => "json"                                                                                                                                                                          
+#      send_as_tags => ["host", "status", "dest_port", "instance", "org", "businesshours", "job", "country_code", "bu_code", "device_name","SCW", "total_business_hours", "target", "siteName", "job_status" ]                                                                                                                              
+#      use_event_fields_for_data_points => true
+#      data_points => {}
+#      exclude_fields => ["@timestamp_logstash", "@timestamp", "@version", "type", "tags", "host"]
+# }
+}

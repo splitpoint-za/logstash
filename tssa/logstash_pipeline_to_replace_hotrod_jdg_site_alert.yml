@@ -1,0 +1,175 @@
+# Last Changes were made on the 12 Novemeber 2020.
+input {
+  exec {
+    command => "/usr/share/logstash/bin/jdgsiteupdownalert.sh"
+    schedule => "*/60 * * * * * UTC"
+    codec => multiline {
+      pattern => "\n"
+      what => "previous"
+    }
+  }
+}
+
+
+# Filter for site sla
+
+filter {
+  grok {
+   tag_on_failure => []
+   break_on_match => false
+   match => [
+            "message",  "probe_success\{instance=\"(?<instance>[^\"]+)\",job=\"(?<job>[^\"]+)\"\} (?<ok>\d+) (?<epoch_millis>\d+)"
+            ]
+  }
+  grok {
+   tag_on_failure => []
+   break_on_match => false
+   match => [
+            "job",  "[^-]+-[^-]+-[^-]+-[^-]+-(?<org>[^-]+)-",
+            "job",  "^(?<job_status>[^-]+)-(?<device_name>.*)-(?<bu_code>[^\n]+)$",
+            "job",  "^[^-]+-(?<sitename>.*)$",
+            "job",  "^[^-]+-[^-]+-(?<org_name>.*)$",
+            "instance",  "^\w{2}(?<country_code>.*)SD\-[^:]+(?<interface>\d+):(?<dest_port>\d+)$"
+            ]
+  }
+if "1" in [ok] {
+  mutate {
+    add_field => { "status" => "On" }
+
+ }
+}
+else if "0" in [ok] {
+  mutate {
+    add_field => { "status" => "Off" }
+
+  }
+ }
+  mutate {
+    add_field => { "[@timestamp_logstash]" => "%{[@timestamp]}" }
+    add_field => { "uuid" => "%{bu_code}-%{interface}-%{epoch_millis}" }
+    add_field => { "hostname" => "%{sitename}" }
+  }
+
+date {
+  match => [ "epoch_millis", "UNIX_MS" ]
+  timezone => "Africa/Harare"
+  }
+  if [interface] != "0"{
+  drop {}
+  }
+
+  aggregate {
+    aggregate_maps_path => "/var/lib/logstash/.aggregate_maps_jdg_alerts"
+    task_id => "%{job}"
+    timeout => 31556952
+    inactivity_timeout => 31556952
+    code => "
+      map['previous_durable_status'] ||= event.get('status')
+
+      event.set('old_status', event.get('status'))
+      event.set('previous_status', map['previous_status'])
+      if (event.get('status') == 'On')
+      map['alert_duration_up1'] ||= 0
+      map['alert_duration_up1'] += 1
+      event.set('previous_duration', map['alert_duration_up1'])
+      else
+        map['alert_duration_up1'] = 0
+      end
+      if (event.get('status') == 'Off')
+        map['alert_duration_down1'] ||= 0
+        map['alert_duration_down1'] += 1
+        event.set('previous_duration', map['alert_duration_down1'])
+      else
+        map['alert_duration_down1'] = 0
+      end
+      if (event.get('previous_duration') > 14)
+         map['previous_status'] = event.get('status')
+      end
+      if (event.get('previous_status') == 'On')
+      map['alert_duration_up'] ||= 0
+      map['alert_duration_up'] += 1
+      event.set('duration', map['alert_duration_up'])
+      else
+        map['alert_duration_up'] = 0
+      end
+      if (event.get('previous_status') == 'Off')
+        map['alert_duration_down'] ||= 0
+        map['alert_duration_down'] += 1
+        event.set('duration', map['alert_duration_down'])
+      else
+        map['alert_duration_down'] = 0
+      end
+    "
+  }
+if ![previous_status]{
+  drop {}
+}
+
+if ("On" in [previous_status] and [duration] == 1) {
+  mutate {
+    add_field => { "alert_message" => "%{sitename} is up" }
+   }
+ }
+if ("Off" in [previous_status] and [duration] == 1) {
+  mutate {
+    add_field => { "alert_message" => "%{sitename} is down"}
+   }
+ }
+fingerprint {
+  source => "message"
+  target => "[@metadata][fingerprint]"
+  method => "MD5"
+  key => "sla"
+ }
+ruby {
+  code => "event.set('[@metadata][tsprefix]', event.get('@timestamp').to_i.to_s(16))"
+ }
+if [ok] {
+  mutate {
+    add_field => { "status_code" => "%{ok}"}
+  }
+}
+
+if "MMTCP" in [job_status] {
+drop{}
+}
+  mutate {
+    add_field => {"syslogProgram" =>  "hotrod-pipe-alert-site_down"}
+}
+  mutate {
+    remove_field => ["message", "command", "path", "ok_tmp_up", "ok_tmp", "status_tmp_up", "status_tmp", "alert_up", "alert_duration_up", "alert_down", "alert_duration_down", "bu_code", "country_code", "dest_port", "device_name", "job_status", "ok", "old_ok", "second_since", "sitename", "status"]
+  }
+mutate {
+  convert => [
+    "epoch_millis", "integer",
+    "status_code", "integer",
+    "previous_duration", "integer",
+    "interface", "integer"
+    ]
+  }
+}
+
+
+
+# Output to  Elasticsearch cluster
+output{
+if [alert_message] {
+  elasticsearch {
+    index => "logstash-jdg-alert-site-%{+YYYY.MM.dd}"
+    hosts => ["196.9.88.116:9200", "196.9.88.117:9200", "196.9.88.118:9200"]
+    document_id => "%{[@metadata][tsprefix]}%{[@metadata][fingerprint]}"
+   }
+#  stdout{codec=>rubydebug}
+ }
+#    influxdb {                                                                                                                                                                                
+#      host => "192.168.26.104"                                                                                                                                                                      
+#      port => 8086                                                                                                                                                                              
+#      ssl => "false"                                                                                                                                                                            
+#      db => "logstashJDPsiteSLA"                                                                                                                                                                          
+#      codec => "json"                                                                                                                                                                          
+#      send_as_tags => ["host", "status", "dest_port", "instance", "org", "businesshours", "job", "country_code", "bu_code", "device_name","SCW", "total_business_hours", "target", "siteName", "job_status" ]                                                                                                                              
+#      use_event_fields_for_data_points => true
+#      data_points => {}
+#      exclude_fields => ["@timestamp_logstash", "@timestamp", "@version", "type", "tags", "host"]
+# }
+}
