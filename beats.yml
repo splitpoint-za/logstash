@@ -1,345 +1,398 @@
-input {
-  beats {
-    port => 5044
-  }
-}
-
-filter {
-  grok {
-   tag_on_failure => []
-   break_on_match => false
-   match => [
-           # filter for TCP Complete logs.
-            "message",  "^(?<c_ip>[^\s]+)\s+(?<c_port>[^\s]+)\s+(?<c_pkts_all>[^\s]+)\s+(?<c_rst_cnt>[^\s]+)\s+(?<c_ack_cnt>[^\s]+)\s+(?<c_ack_cnt_p>[^\s]+)\s+(?<c_bytes_uniq>[^\s]+)\s+(?<c_pkts_data>[^\s]+)\s+(?<c_bytes_all>[^\s]+)\s+(?<c_pkts_retx>[^\s]+)\s+(?<c_bytes_retx>[^\s]+)\s+(?<c_pkts_ooo>[^\s]+)\s+(?<c_syn_cnt>[^\s]+)\s+(?<c_fin_cnt>[^\s]+)\s+(?<s_ip>[^\s]+)\s+(?<s_port>[^\s]+)\s+(?<s_pkts_all>[^\s]+)\s+(?<s_rst_cnt>[^\s]+)\s+(?<s_ack_cnt>[^\s]+)\s+(?<s_ack_cnt_p>[^\s]+)\s+(?<s_bytes_uniq>[^\s]+)\s+(?<s_pkts_data>[^\s]+)\s+(?<s_bytes_all>[^\s]+)\s+(?<s_pkts_retx>[^\s]+)\s+(?<s_bytes_retx>[^\s]+)\s+(?<s_pkts_ooo>[^\s]+)\s+(?<s_syn_cnt>[^\s]+)\s+(?<s_fin_cnt>[^\s]+)\s+(?<first>[^\s]+)\s+(?<last>[^\s]+)\s+(?<durat>[^\s]+)\s+(?<c_first>[^\s]+)\s+(?<s_first>[^\s]+)\s+(?<c_last>[^\s]+)\s+(?<s_last>[^\s]+)\s+(?<c_first_ack>[^\s]+)\s+(?<s_first_ack>[^\s]+)\s+(?<c_isint>[^\s]+)\s+(?<s_isint>[^\s]+)\s+(?<c_iscrypto>[^\s]+)\s+(?<s_iscrypto>[^\s]+)\s+(?<con_t>[^\s]+)\s+(?<p2p_t>[^\s]+)\s+(?<http_t>[^\s]+)\s+(?<c_rtt_avg>[^\s]+)\s+(?<c_rtt_min>[^\s]+)\s+(?<c_rtt_max>[^\s]+)\s+(?<c_rtt_std>[^\s]+)\s+(?<c_rtt_cnt>[^\s]+)\s+(?<c_ttl_min>[^\s]+)\s+(?<c_ttl_max>[^\s]+)\s+(?<s_rtt_avg>[^\s]+)\s+(?<s_rtt_min>[^\s]+)\s+(?<s_rtt_max>[^\s]+)\s+(?<s_rtt_std>[^\s]+)\s+(?<s_rtt_cnt>[^\s]+)\s+(?<s_ttl_min>[^\s]+)\s+(?<s_ttl_max>[^\s]+)\s+(?<p2p_st>[^\s]+)\s+(?<ed2k_data>[^\s]+)\s+(?<ed2k_sig>[^\s]+)\s+(?<ed2k_c2s>[^\s]+)\s+(?<ed2k_c2c>[^\s]+)\s+(?<ed2k_chat>[^\s]+)\s+(?<c_f1323_opt>[^\s]+)\s+(?<c_tm_opt>[^\s]+)\s+(?<c_win_scl>[^\s]+)\s+(?<c_sack_opt>[^\s]+)\s+(?<c_sack_cnt>[^\s]+)\s+(?<c_mss>[^\s]+)\s+(?<c_mss_max>[^\s]+)\s+(?<c_mss_min>[^\s]+)\s+(?<c_win_max>[^\s]+)\s+(?<c_win_min>[^\s]+)\s+(?<c_win_0>[^\s]+)\s+(?<c_cwin_max>[^\s]+)\s+(?<c_cwin_min>[^\s]+)\s+(?<c_cwin_ini>[^\s]+)\s+(?<c_pkts_rto>[^\s]+)\s+(?<c_pkts_fs>[^\s]+)\s+(?<c_pkts_reor>[^\s]+)\s+(?<c_pkts_dup>[^\s]+)\s+(?<c_pkts_unk>[^\s]+)\s+(?<c_pkts_fc>[^\s]+)\s+(?<c_pkts_unrto>[^\s]+)\s+(?<c_pkts_unfs>[^\s]+)\s+(?<c_syn_retx>[^\s]+)\s+(?<s_f1323_opt>[^\s]+)\s+(?<s_tm_opt>[^\s]+)\s+(?<s_win_scl>[^\s]+)\s+(?<s_sack_opt>[^\s]+)\s+(?<s_sack_cnt>[^\s]+)\s+(?<s_mss>[^\s]+)\s+(?<s_mss_max>[^\s]+)\s+(?<s_mss_min>[^\s]+)\s+(?<s_win_max>[^\s]+)\s+(?<s_win_min>[^\s]+)\s+(?<s_win_0>[^\s]+)\s+(?<s_cwin_max>[^\s]+)\s+(?<s_cwin_min>[^\s]+)\s+(?<s_cwin_ini>[^\s]+)\s+(?<s_pkts_rto>[^\s]+)\s+(?<s_pkts_fs>[^\s]+)\s+(?<s_pkts_reor>[^\s]+)\s+(?<s_pkts_dup>[^\s]+)\s+(?<s_pkts_unk>[^\s]+)\s+(?<s_pkts_fc>[^\s]+)\s+(?<s_pkts_unrto>[^\s]+)\s+(?<s_pkts_unfs>[^\s]+)\s+(?<s_syn_retx>[^\s]+)\s+(?<http_req_cnt>[^\s]+)\s+(?<http_res_cnt>[^\s]+)\s+(?<http_res>[^\s]+)\s+(?<c_pkts_push>[^\s]+)\s+(?<s_pkts_push>[^\s]+)\s+(?<c_tls_SNI>[^\s]+)\s+(?<s_tls_SCN>[^\s]+)\s+(?<c_npnalpn>[^\s]+)\s+(?<s_npnalpn>[^\s]+)\s+(?<tls_session_stat>[^\s]+)\s+(?<c_last_handshakeT>[^\s]+)\s+(?<s_last_handshakeT>[^\s]+)\s+(?<c_appdataT>[^\s]+)\s+(?<s_appdataT>[^\s]+)\s+(?<c_appdataB>[^\s]+)\s+(?<s_appdataB>[^\s]+)\s+(?<fqdn>[^\s]+)\s+(?<dns_rslv>[^\s]+)\s+(?<req_tm>[^\s]+)\s+(?<res_tm>[^\s]+)\s+(?<http_hostname>[^\s]+)\s+(?<c_TLSvers>[^\s]+)\s+(?<s_TLSvers>[^\s]+)\s+(?<dns_enc>[^\s]+)$",
-            "message", "^(?<c_ip>[^\s]+)\s+(?<c_port>[^\s]+)\s+(?<c_pkts_all>[^\s]+)\s+(?<c_rst_cnt>[^\s]+)\s+(?<c_ack_cnt>[^\s]+)\s+(?<c_ack_cnt_p>[^\s]+)\s+(?<c_bytes_uniq>[^\s]+)\s+(?<c_pkts_data>[^\s]+)\s+(?<c_bytes_all>[^\s]+)\s+(?<c_pkts_retx>[^\s]+)\s+(?<c_bytes_retx>[^\s]+)\s+(?<c_pkts_ooo>[^\s]+)\s+(?<c_syn_cnt>[^\s]+)\s+(?<c_fin_cnt>[^\s]+)\s+(?<s_ip>[^\s]+)\s+(?<s_port>[^\s]+)\s+(?<s_pkts_all>[^\s]+)\s+(?<s_rst_cnt>[^\s]+)\s+(?<s_ack_cnt>[^\s]+)\s+(?<s_ack_cnt_p>[^\s]+)\s+(?<s_bytes_uniq>[^\s]+)\s+(?<s_pkts_data>[^\s]+)\s+(?<s_bytes_all>[^\s]+)\s+(?<s_pkts_retx>[^\s]+)\s+(?<s_bytes_retx>[^\s]+)\s+(?<s_pkts_ooo>[^\s]+)\s+(?<s_syn_cnt>[^\s]+)\s+(?<s_fin_cnt>[^\s]+)\s+(?<first>[^\s]+)\s+(?<last>[^\s]+)\s+(?<durat>[^\s]+)\s+(?<c_first>[^\s]+)\s+(?<s_first>[^\s]+)\s+(?<c_last>[^\s]+)\s+(?<s_last>[^\s]+)\s+(?<c_first_ack>[^\s]+)\s+(?<s_first_ack>[^\s]+)\s+(?<c_isint>[^\s]+)\s+(?<s_isint>[^\s]+)\s+(?<c_iscrypto>[^\s]+)\s+(?<s_iscrypto>[^\s]+)\s+(?<con_t>[^\s]+)\s+(?<p2p_t>[^\s]+)\s+(?<http_t>[^\s]+)$",
-            "message", "^(?<c_ip>[^\s]+)\s+(?<c_port>[^\s]+)\s+(?<c_first_abs>[^\s]+)\s+(?<c_durat>[^\s]+)\s+(?<c_bytes_all>[^\s]+)\s+(?<c_pkts_all>[^\s]+)\s+(?<c_isint>[^\s]+)\s+(?<c_iscrypto>[^\s]+)\s+(?<c_type>[^\s]+)\s+(?<s_ip>[^\s]+)\s+(?<s_port>[^\s]+)\s+(?<s_first_abs>[^\s]+)\s+(?<s_durat>[^\s]+)\s+(?<s_bytes_all>[^\s]+)\s+(?<s_pkts_all>[^\s]+)\s+(?<s_isint>[^\s]+)\s+(?<s_iscrypto>[^\s]+)\s+(?<s_type>[^\s]+)\s+(?<fqdn>[^\s]+)\s+(?<quic_SNI>[^\s]+)\s+(?<quic_UA>[^\s]+)\s+(?<quic_CHLO>[^\s]+)\s+(?<quic_REJ>[\d+]+)$",
-            "message", "^(?<c_ip>[^\t]+)\t+(?<c_port>[^\t]+)\t+(?<s_ip>[^\t]+)\t+(?<s_port>[^\t]+)\t+(?<time_abs>[^\t]+)\t+(?<METHOD>[^\t]+)\t+(?<HOSTNAME>[^\t]+)\t+(?<FQDN>[^\t]+)\t+(?<HTTP_PATH>[^\t]+)\t+(?<REFERER>[^\t]+)\t+(?<USER_AGENT>[^\t]+)\t+(?<COOKIE>[^\t]+)\t+(?<DNT>[^\t]+)$",
-            "message", "(?<value>\d+)\s+(?<count>\d+)$",
-            "source", "\/(?<capture_interface>[^\/]+)\/(?<date>[^\/]+).out\/(?<munate>[^\/]+)\/(?<histo_name>\w+)$",
-            "message", "^(?<c_ip>[^\s]+)\s+(?<c_port>[^\s]+)\s+(?<c_pkts_all>[^\s]+)\s+(?<c_rst_cnt>[^\s]+)\s+(?<c_ack_cnt>[^\s]+)\s+(?<c_ack_cnt_p>[^\s]+)\s+(?<c_bytes_uniq>[^\s]+)\s+(?<c_pkts_data>[^\s]+)\s+(?<c_bytes_all>[^\s]+)\s+(?<c_pkts_retx>[^\s]+)\s+(?<c_bytes_retx>[^\s]+)\s+(?<c_pkts_ooo>[^\s]+)\s+(?<c_syn_cnt>[^\s]+)\s+(?<c_fin_cnt>[^\s]+)\s+(?<s_ip>[^\s]+)\s+(?<s_port>[^\s]+)\s+(?<s_pkts_all>[^\s]+)\s+(?<s_rst_cnt>[^\s]+)\s+(?<s_ack_cnt>[^\s]+)\s+(?<s_ack_cnt_p>[^\s]+)\s+(?<s_bytes_uniq>[^\s]+)\s+(?<s_pkts_data>[^\s]+)\s+(?<s_bytes_all>[^\s]+)\s+(?<s_pkts_retx>[^\s]+)\s+(?<s_bytes_retx>[^\s]+)\s+(?<s_pkts_ooo>[^\s]+)\s+(?<s_syn_cnt>[^\s]+)\s+(?<s_fin_cnt>[^\s]+)\s+(?<first>[^\s]+)\s+(?<last>[^\s]+)\s+(?<durat>[^\s]+)\s+(?<c_first>[^\s]+)\s+(?<s_first>[^\s]+)\s+(?<c_last>[^\s]+)\s+(?<s_last>[^\s]+)\s+(?<c_first_ack>[^\s]+)\s+(?<s_first_ack>[^\s]+)\s+(?<c_isint>[^\s]+)\s+(?<s_isint>[^\s]+)\s+(?<c_iscrypto>[^\s]+)\s+(?<s_iscrypto>[^\s]+)\s+(?<con_t>[^\s]+)\s+(?<p2p_t>[^\s]+)\s+(?<http_t>[^\s]+)\s+(?<c_rtt_avg>[^\s]+)\s+(?<c_rtt_min>[^\s]+)\s+(?<c_rtt_max>[^\s]+)\s+(?<c_rtt_std>[^\s]+)\s+(?<c_rtt_cnt>[^\s]+)\s+(?<c_ttl_min>[^\s]+)\s+(?<c_ttl_max>[^\s]+)\s+(?<s_rtt_avg>[^\s]+)\s+(?<s_rtt_min>[^\s]+)\s+(?<s_rtt_max>[^\s]+)\s+(?<s_rtt_std>[^\s]+)\s+(?<s_rtt_cnt>[^\s]+)\s+(?<s_ttl_min>[^\s]+)\s+(?<s_ttl_max>[^\s]+)\s+(?<vd_type_cont>[^\s]+)\s+(?<vd_type_pay>[^\s]+)\s+(?<yt_id16_46>[^\s]+)\s+(?<yt_itag>[\n]+)$",
-            "message", "^(?<a_proto>[^\s]+)\s+(?<direction>[^\s]+)\s+(?<c_proto>[^\s]+)\s+(?<c_ip>[^\s]+)\s+(?<c_port>[^\s]+)\s+(?<c_internal>[^\s]+)\s+(?<c_iscrypto>[^\s]+)\s+(?<c_mux_prot>[^\s]+)\s+(?<s_proto>[^\s]+)\s+(?<s_ip>[^\s]+)\s+(?<s_port>[^\s]+)\s+(?<s_internal>[^\s]+)\s+(?<s_iscrypto>[^\s]+)\s+(?<s_mux_prot>[^\s]+)\s+(?<packets>[^\s]+)\s+(?<ipg>[^\s]+)\s+(?<jitter_avg>[^\s]+)\s+(?<jitter_max>[^\s]+)\s+(?<jitter_min>[^\s]+)\s+(?<ttl_avg>[^\s]+)\s+(?<ttl_max>[^\s]+)\s+(?<ttl_min>[^\s]+)\s+(?<starttime>[^\s]+)\s+(?<duration>[^\s]+)\s+(?<databytes>[^\s]+)\s+(?<speed>[^\s]+)\s+(?<SSRC>[^\s]+)\s+(?<losses>[^\s]+)\s+(?<oos>[^\s]+)\s+(?<dup>[^\s]+)\s+(?<late>[^\s]+)\s+(?<pt_id>[^\s]+)\s+(?<pt_counters>[^\s]+)\s+(?<bogus>[^\s]+)\s+(?<rtcp_losses>[^\s]+)\s+(?<rtcp_fraclost>[^\s]+)\s+(?<rtcp_lenpack>[^\s]+)\s+(?<rtcp_lenbytes>[^\s]+)\s+(?<rtt_avg>[^\s]+)\s+(?<rtt_max>[^\s]+)\s+(?<rtt_min>[^\s]+)\s+(?<rtt_samples>[^\s]+)\s+(?<rtcp_trunc>[^\s]+)\s+(?<rtp_max_payload>[^\s]+)\s+(?<rtp_min_payload>[^\s]+)\s+(?<rtp_avg_payload>[^\s]+)\s+(?<rtp_stdev_payload>[^\s]+)\s+(?<jitter8k_avg>[^\s]+)\s+(?<jitter8k_max>[^\s]+)\s+(?<jitter8k_min>[^\s]+)\s+(?<jitter90k_avg>[^\s]+)\s+(?<jitter90k_max>[^\s]+)\s+(?<jitter90k_min>[\n]+)$",
-            "message", "^(?<c_ip>[^\s]+)\s+(?<c_port>[^\s]+)\s+(?<c_bytes_uniq>[^\s]+)\s+(?<c_pkts_all>[^\s]+)\s+(?<c_msn>[^\s]+)\s+(?<c_msn_a>[^\s]+)\s+(?<c_msn_d>[^\s]+)\s+(?<c_msn_n>[^\s]+)\s+(?<c_msn_u>[^\s]+)\s+(?<c_msn_y>[^\s]+)\s+(?<s_ip>[^\s]+)\s+(?<s_port>[^\s]+)\s+(?<s_bytes_uniq>[^\s]+)\s+(?<s_pkts_all>[^\s]+)\s+(?<s_msn>[^\s]+)\s+(?<s_msn_a>[^\s]+)\s+(?<s_msn_d>[^\s]+)\s+(?<s_msn_n>[^\s]+)\s+(?<s_msn_u>[^\s]+)\s+(?<s_msn_y>[^\s]+)\s+(?<first_tm>[^\s]+)\s+(?<durat>[^\s]+)\s+(?<type>[^\s]+)\s+(?<ver>[^\s]+)\s+(?<c_isint>[^\s]+)\s+(?<flowid>[^\s]+)\s+(?<T>[^\s]+)\s+(?<con_t>[^\s]+)\s+(?<c_iscrypto>[^\s]+)\s+(?<s_iscrypto>[\n]+)$"
-            ]
-  }
-
-  # Delete headers of tcp, udp, http, mm,video,chat complete and histogram headers.
-if ![value] and "histogram" in [fields][tstat_type] {
-  drop {}
-} 
-if ![c_first_abs] and "udp_complete" in [fields][tstat_type]  {
-  drop {}
-} 
-if ![c_first_abs] and "udp_complete" in [fields][tstat_type] {
-  drop {}
-}
-# Create HTTP fields.
-
-  if "HTTP" in [METHOD] {
-    mutate {
-    add_field => { "method" => "%{METHOD}" }
-    add_field => { "response" => "%{HOSTNAME}" }
-    add_field => { "content_len" => "%{FQDN}" }
-    add_field => { "content_type" => "%{HTTP_PATH}" }
-    add_field => { "server" => "%{REFERER}" }
-    add_field => { "range" => "%{USER_AGENT}" }
-    add_field => { "location" => "%{COOKIE}" }
-    add_field => { "set_cookie" => "%{DNT}" }
+  input {
+    beats {
+      port => 5044
     }
   }
 
-  if [METHOD] != "HTTP" and [METHOD] {
-    mutate {
-    add_field => { "method" => "%{METHOD}" }
-    add_field => { "hostname" => "%{HOSTNAME}" }
-    add_field => { "fqdn" => "%{FQDN}" }
-    add_field => { "http_path" => "%{HTTP_PATH}" }
-    add_field => { "referer" => "%{REFERER}" }
-    add_field => { "user_agent" => "%{USER_AGENT}" }
-    add_field => { "cookie" => "%{COOKIE}" }
-    add_field => { "dnt" => "%{DNT}" }
-    }
-  }
-
-  mutate {
-    remove_field => ["METHOD", "HOSTNAME", "FQDN", "HTTP_PATH", "REFERER", "USER_AGENT", "COOKIE", "DNT"]
-  }
-  if [c_first_abs] {
+  filter {
+    if "udp_complete" in [fields][tstat_type] {
     grok {
-      tag_on_failure => []
-      break_on_match => false
-      match => ["c_first_abs",  "^(?<timestamp_s>[^.]+.\d{2})"]
-      }
-  }
-  if [munate] and [capture_interface] {
-     date {
-       match => ["date", "YYYY_MM_dd_HH_mm"]
-       target => "date"
+    tag_on_failure => []
+    break_on_match => false
+    match => [
+            # filter for UDP Complete logs.
+            "message", "^(?<c_ip>[^\s]+)\s+(?<c_port>[^\s]+)\s+(?<c_first_abs>[^\s]+)\s+(?<c_durat>[^\s]+)\s+(?<c_bytes_all>[^\s]+)\s+(?<c_pkts_all>[^\s]+)\s+(?<c_isint>[^\s]+)\s+(?<c_iscrypto>[^\s]+)\s+(?<c_type>[^\s]+)\s+(?<s_ip>[^\s]+)\s+(?<s_port>[^\s]+)\s+(?<s_first_abs>[^\s]+)\s+(?<s_durat>[^\s]+)\s+(?<s_bytes_all>[^\s]+)\s+(?<s_pkts_all>[^\s]+)\s+(?<s_isint>[^\s]+)\s+(?<s_iscrypto>[^\s]+)\s+(?<s_type>[^\s]+)\s+(?<fqdn>[^\s]+)\s+(?<quic_sni>[^\s]+)\s+(?<quic_ua>[^\s]+)\s+(?<quic_chlo>[^\s]+)\s+(?<quic_rej>[^\s]+)$"
+            ]
+      
     }
-  
-  # The 60 we multiple by is for the new capture interval time.
-  ruby {
-    code => "
-        event.set('unix_time', event.get('date').to_i)
-        event.set('timstamp', (60 * event.get('munate').to_i) + event.get('unix_time'))"
+    }
+    if "tcp_complete" in [fields][tstat_type] {
+    grok {
+    tag_on_failure => []
+    break_on_match => false
+    match => [
+            # filter for TCP Complete logs.
+
+              "message",  "^(?<c_ip>[^\s]+)\s(?<c_port>[^\s]+)\s(?<c_pkts_all>[^\s]+)\s(?<c_rst_cnt>[^\s]+)\s(?<c_ack_cnt>[^\s]+)\s(?<c_ack_cnt_p>[^\s]+)\s(?<c_bytes_uniq>[^\s]+)\s(?<c_pkts_data>[^\s]+)\s(?<c_bytes_all>[^\s]+)\s(?<c_pkts_retx>[^\s]+)\s(?<c_bytes_retx>[^\s]+)\s(?<c_pkts_ooo>[^\s]+)\s(?<c_syn_cnt>[^\s]+)\s(?<c_fin_cnt>[^\s]+)\s(?<s_ip>[^\s]+)\s(?<s_port>[^\s]+)\s(?<s_pkts_all>[^\s]+)\s(?<s_rst_cnt>[^\s]+)\s(?<s_ack_cnt>[^\s]+)\s(?<s_ack_cnt_p>[^\s]+)\s(?<s_bytes_uniq>[^\s]+)\s(?<s_pkts_data>[^\s]+)\s(?<s_bytes_all>[^\s]+)\s(?<s_pkts_retx>[^\s]+)\s(?<s_bytes_retx>[^\s]+)\s(?<s_pkts_ooo>[^\s]+)\s(?<s_syn_cnt>[^\s]+)\s(?<s_fin_cnt>[^\s]+)\s(?<first>[^\s]+)\s(?<last>[^\s]+)\s(?<durat>[^\s]+)\s(?<c_first>[^\s]+)\s(?<s_first>[^\s]+)\s(?<c_last>[^\s]+)\s(?<s_last>[^\s]+)\s(?<c_first_ack>[^\s]+)\s(?<s_first_ack>[^\s]+)\s(?<c_isint>[^\s]+)\s(?<s_isint>[^\s]+)\s(?<c_iscrypto>[^\s]+)\s(?<s_iscrypto>[^\s]+)\s(?<con_t>[^\s]+)\s(?<p2p_t>[^\s]+)\s(?<http_t>[^\s]+)\s(?<c_rtt_avg>[^\s]+)\s(?<c_rtt_min>[^\s]+)\s(?<c_rtt_max>[^\s]+)\s(?<c_rtt_std>[^\s]+)\s(?<c_rtt_cnt>[^\s]+)\s(?<c_ttl_min>[^\s]+)\s(?<c_ttl_max>[^\s]+)\s(?<s_rtt_avg>[^\s]+)\s(?<s_rtt_min>[^\s]+)\s(?<s_rtt_max>[^\s]+)\s(?<s_rtt_std>[^\s]+)\s(?<s_rtt_cnt>[^\s]+)\s(?<s_ttl_min>[^\s]+)\s(?<s_ttl_max>[^\s]+)\s(?<p2p_st>[^\s]+)\s(?<ed2k_data>[^\s]+)\s(?<ed2k_sig>[^\s]+)\s(?<ed2k_c2s>[^\s]+)\s(?<ed2k_c2c>[^\s]+)\s(?<ed2k_chat>[^\s]+)\s(?<c_f1323_opt>[^\s]+)\s(?<c_tm_opt>[^\s]+)\s(?<c_win_scl>[^\s]+)\s(?<c_sack_opt>[^\s]+)\s(?<c_sack_cnt>[^\s]+)\s(?<c_mss>[^\s]+)\s(?<c_mss_max>[^\s]+)\s(?<c_mss_min>[^\s]+)\s(?<c_win_max>[^\s]+)\s(?<c_win_min>[^\s]+)\s(?<c_win_0>[^\s]+)\s(?<c_cwin_max>[^\s]+)\s(?<c_cwin_min>[^\s]+)\s(?<c_cwin_ini>[^\s]+)\s(?<c_pkts_rto>[^\s]+)\s(?<c_pkts_fs>[^\s]+)\s(?<c_pkts_reor>[^\s]+)\s(?<c_pkts_dup>[^\s]+)\s(?<c_pkts_unk>[^\s]+)\s(?<c_pkts_fc>[^\s]+)\s(?<c_pkts_unrto>[^\s]+)\s(?<c_pkts_unfs>[^\s]+)\s(?<c_syn_retx>[^\s]+)\s(?<s_f1323_opt>[^\s]+)\s(?<s_tm_opt>[^\s]+)\s(?<s_win_scl>[^\s]+)\s(?<s_sack_opt>[^\s]+)\s(?<s_sack_cnt>[^\s]+)\s(?<s_mss>[^\s]+)\s(?<s_mss_max>[^\s]+)\s(?<s_mss_min>[^\s]+)\s(?<s_win_max>[^\s]+)\s(?<s_win_min>[^\s]+)\s(?<s_win_0>[^\s]+)\s(?<s_cwin_max>[^\s]+)\s(?<s_cwin_min>[^\s]+)\s(?<s_cwin_ini>[^\s]+)\s(?<s_pkts_rto>[^\s]+)\s(?<s_pkts_fs>[^\s]+)\s(?<s_pkts_reor>[^\s]+)\s(?<s_pkts_dup>[^\s]+)\s(?<s_pkts_unk>[^\s]+)\s(?<s_pkts_fc>[^\s]+)\s(?<s_pkts_unrto>[^\s]+)\s(?<s_pkts_unfs>[^\s]+)\s(?<s_syn_retx>[^\s]+)\s(?<http_req_cnt>[^\s]+)\s(?<http_res_cnt>[^\s]+)\s(?<http_res>[^\s]+)\s(?<c_pkts_push>[^\s]+)\s(?<s_pkts_push>[^\s]+)\s(?<c_tls_SNI>[^\s]+)\s(?<s_tls_SCN>[^\s]+)\s(?<c_npnalpn>[^\s]+)\s(?<s_npnalpn>[^\s]+)\s(?<c_tls_sesid>[^\s]+)\s(?<c_last_handshakeT>[^\s]+)\s(?<s_last_handshakeT>[^\s]+)\s(?<c_appdataT>[^\s]+)\s(?<s_appdataT>[^\s]+)\s(?<c_appdataB>[^\s]+)\s(?<s_appdataB>[^\s]+)\s(?<fqdn>[^\s]+)\s(?<dns_rslv>[^\s]+)\s(?<req_tm>[^\s]+)\s(?<res_tm>[0-9.-]+)$"
+              ]
+            }
+    } 
+
+    if "tcp_none_complete" in [fields][tstat_type] {
+    grok {
+    tag_on_failure => []
+    break_on_match => false
+    match => [
+            # filter for TCP None Complete logs.
+
+              "message",  "^(?<c_ip>[^\s]+)\s+(?<c_port>[^\s]+)\s+(?<c_pkts_all>[^\s]+)\s+(?<c_rst_cnt>[^\s]+)\s+(?<c_ack_cnt>[^\s]+)\s+(?<c_ack_cnt_p>[^\s]+)\s+(?<c_bytes_uniq>[^\s]+)\s+(?<c_pkts_data>[^\s]+)\s+(?<c_bytes_all>[^\s]+)\s+(?<c_pkts_retx>[^\s]+)\s+(?<c_bytes_retx>[^\s]+)\s+(?<c_pkts_ooo>[^\s]+)\s+(?<c_syn_cnt>[^\s]+)\s+(?<c_fin_cnt>[^\s]+)\s+(?<s_ip>[^\s]+)\s+(?<s_port>[^\s]+)\s+(?<s_pkts_all>[^\s]+)\s+(?<s_rst_cnt>[^\s]+)\s+(?<s_ack_cnt>[^\s]+)\s+(?<s_ack_cnt_p>[^\s]+)\s+(?<s_bytes_uniq>[^\s]+)\s+(?<s_pkts_data>[^\s]+)\s+(?<s_bytes_all>[^\s]+)\s+(?<s_pkts_retx>[^\s]+)\s+(?<s_bytes_retx>[^\s]+)\s+(?<s_pkts_ooo>[^\s]+)\s+(?<s_syn_cnt>[^\s]+)\s+(?<s_fin_cnt>[^\s]+)\s+(?<first>[^\s]+)\s+(?<last>[^\s]+)\s+(?<durat>[^\s]+)\s+(?<c_first>[^\s]+)\s+(?<s_first>[^\s]+)\s+(?<c_last>[^\s]+)\s+(?<s_last>[^\s]+)\s+(?<c_first_ack>[^\s]+)\s+(?<s_first_ack>[^\s]+)\s+(?<c_isint>[^\s]+)\s+(?<s_isint>[^\s]+)\s+(?<c_iscrypto>[^\s]+)\s+(?<s_iscrypto>[^\s]+)\s+(?<con_t>[^\s]+)\s+(?<p2p_t>[^\s]+)\s+(?<http_t>[^\s]+)$"
+              ]
+            }
+    }
+
+    
+    if "http_complete" in [fields][tstat_type] {    
+    grok {
+    tag_on_failure => []
+    break_on_match => false
+    match => [
+            # filter for HTTP Complete logs.
+              
+              "message", "^(?<c_ip>[^\t]+)\t+(?<c_port>[^\t]+)\t+(?<s_ip>[^\t]+)\t+(?<s_port>[^\t]+)\t+(?<time_abs>[^\t]+)\t+(?<METHOD>[^\t]+)\t+(?<HOSTNAME>[^\t]+)\t+(?<FQDN>[^\t]+)\t+(?<HTTP_PATH>[^\t]+)\t+(?<REFERER>[^\t]+)\t+(?<USER_AGENT>[^\t]+)\t+(?<COOKIE>[^\t]+)\t+(?<DNT>[^\t]+)$"
+              ]
+    }
+    }
+    if "histogram" in [fields][tstat_type] {  
+    grok {
+    tag_on_failure => []
+    break_on_match => false
+    match => [
+            # filter for Histogram logs.            
+              
+              "message", "(?<value>\d+)\s+(?<count>\d+)$",
+              "source", "\/(?<capture_interface>[^\/]+)\/(?<date>[^\/]+).out\/(?<munate>[^\/]+)\/(?<histo_name>\w+)$"
+              ]
+    }
+    }
+
+    # Delete headers of tcp, udp, http, mm,video,chat complete and histogram headers.
+  if ![value] and "histogram" in [fields][tstat_type] {
+    drop {}
+  } 
+ # if ![c_first_abs] and "udp_complete" in [fields][tstat_type]  {
+  #  drop {}
+  #} 
+  if ![c_ip] and "tcp_complete" in [fields][tstat_type] {
+    drop {}
+  }
+ # if "http_hostname:131" in [http_hostname] and "tcp_none_complete" in [fields][tstat_type] {
+ #   drop {}
+ # }
+
+  # Create HTTP fields.
+
+    if "HTTP" in [METHOD] {
+      mutate {
+      add_field => { "method" => "%{METHOD}" }
+      add_field => { "response" => "%{HOSTNAME}" }
+      add_field => { "content_len" => "%{FQDN}" }
+      add_field => { "content_type" => "%{HTTP_PATH}" }
+      add_field => { "server" => "%{REFERER}" }
+      add_field => { "range" => "%{USER_AGENT}" }
+      add_field => { "location" => "%{COOKIE}" }
+      add_field => { "set_cookie" => "%{DNT}" }
+      }
+    }
+
+    if [METHOD] != "HTTP" and [METHOD] {
+      mutate {
+      add_field => { "method" => "%{METHOD}" }
+      add_field => { "hostname" => "%{HOSTNAME}" }
+      add_field => { "fqdn" => "%{FQDN}" }
+      add_field => { "http_path" => "%{HTTP_PATH}" }
+      add_field => { "referer" => "%{REFERER}" }
+      add_field => { "user_agent" => "%{USER_AGENT}" }
+      add_field => { "cookie" => "%{COOKIE}" }
+      add_field => { "dnt" => "%{DNT}" }
+      }
+    }
+
+    mutate {
+      remove_field => ["METHOD", "HOSTNAME", "FQDN", "HTTP_PATH", "REFERER", "USER_AGENT", "COOKIE", "DNT"]
+    }
+    if [c_first_abs] {
+      grok {
+        tag_on_failure => []
+        break_on_match => false
+        match => ["c_first_abs",  "^(?<timestamp_s>[^.]+.\d{2})"]
         }
     }
- 
-mutate {
-  convert => [
-    "s_port", "integer",
-    "c_port", "integer",
-    "timestamp_s", "integer",
-    "time_abs", "integer",
-    "munate", "integer",
-    "value", "integer",
-    "count", "integer",
-    "c_pkts_all", "integer",
-    "c_rst_cnt", "integer",
-    "c_ack_cnt", "integer",
-    "c_ack_cnt_p", "integer",
-    "c_bytes_uniq", "integer",
-    "c_pkts_data", "integer",
-    "c_bytes_all", "integer",
-    "c_pkts_retx", "integer",
-    "c_bytes_retx", "integer",
-    "c_pkts_ooo", "integer",
-    "c_syn_cnt", "integer",
-    "c_fin_cnt", "integer",
-    "s_pkts_all", "integer",
-    "s_rst_cnt", "integer",
-    "s_ack_cnt", "integer",
-    "s_ack_cnt_p", "integer",
-    "s_bytes_uniq", "integer",
-    "s_pkts_data", "integer",
-    "s_bytes_all", "integer",
-    "s_pkts_retx", "integer",
-    "s_bytes_retx", "integer",
-    "s_pkts_ooo", "integer",
-    "s_syn_cnt", "integer",
-    "s_fin_cnt", "integer",
-    "first", "integer",
-    "last", "integer",
-    "durat", "integer",
-    "c_first", "integer",
-    "s_first", "integer",
-    "c_last", "integer",
-    "s_last", "integer",
-    "c_first_ack", "integer",
-    "s_first_ack", "integer",
-    "c_isint", "integer",
-    "s_isint", "integer",
-    "c_iscrypto", "integer",
-    "s_iscrypto", "integer",
-    "con_t", "integer",
-    "p2p_t", "integer",
-    "http_t", "integer",
-    "c_rtt_avg", "integer",
-    "c_rtt_min", "integer",
-    "c_rtt_max", "integer",
-    "c_rtt_std", "integer",
-    "c_rtt_cnt", "integer",
-    "c_ttl_min", "integer",
-    "c_ttl_max", "integer",
-    "s_rtt_avg", "integer",
-    "s_rtt_min", "integer",
-    "s_rtt_max", "integer",
-    "s_rtt_std", "integer",
-    "s_rtt_cnt", "integer",
-    "s_ttl_min", "integer",
-    "s_ttl_max", "integer",
-    "p2p_st", "integer",
-    "ed2k_data", "integer",
-    "ed2k_sig", "integer",
-    "ed2k_c2s", "integer",
-    "ed2k_c2c", "integer",
-    "ed2k_chat", "integer",
-    "c_f1323_opt", "integer",
-    "c_tm_opt", "integer",
-    "c_win_scl", "integer",
-    "c_sack_opt", "integer",
-    "c_sack_cnt", "integer",
-    "c_mss", "integer",
-    "c_mss_max", "integer",
-    "c_mss_min", "integer",
-    "c_win_max", "integer",
-    "c_win_min", "integer",
-    "c_win_0", "integer",
-    "c_cwin_max", "integer",
-    "c_cwin_min", "integer",
-    "c_cwin_ini", "integer",
-    "c_pkts_rto", "integer",
-    "c_pkts_fs", "integer",
-    "c_pkts_reor", "integer",
-    "c_pkts_dup", "integer",
-    "c_pkts_unk", "integer",
-    "c_pkts_fc", "integer",
-    "c_pkts_unrto", "integer",
-    "c_pkts_unfs", "integer",
-    "c_syn_retx", "integer",
-    "s_f1323_opt", "integer",
-    "s_tm_opt", "integer",
-    "s_win_scl", "integer",
-    "s_sack_opt", "integer",
-    "s_sack_cnt", "integer",
-    "s_mss", "integer",
-    "s_mss_max", "integer",
-    "s_mss_min", "integer",
-    "s_win_max", "integer",
-    "s_win_min", "integer",
-    "s_win_0", "integer",
-    "s_cwin_max", "integer",
-    "s_cwin_min", "integer",
-    "s_cwin_ini", "integer",
-    "s_pkts_rto", "integer",
-    "s_pkts_fs", "integer",
-    "s_pkts_reor", "integer",
-    "s_pkts_dup", "integer",
-    "s_pkts_unk", "integer",
-    "s_pkts_fc", "integer",
-    "s_pkts_unrto", "integer",
-    "s_pkts_unfs", "integer",
-    "s_syn_retx", "integer",
-    "http_req_cnt", "integer",
-    "http_res_cnt", "integer",
-    "http_res", "integer",
-    "c_pkts_push", "integer",
-    "s_pkts_push", "integer",
-    "c_last_handshakeT", "integer",
-    "s_last_handshakeT", "integer",
-    "req_tm", "integer",
-    "res_tm", "integer"
-  ]
-}
-if [http_t] {
-translate {
-   field => "[http_t]"
-   destination => "[http_type]"
-   dictionary => {
-   "1" => "Unclassified GET command"
-   "2" => "Unclassified POST command"
-   "3" => "MSN Chat command tunneled over HTTP (POST)"
-   "4" => "RTMPT - RTMP over HTTP Tunnel (POST)"
-   "5" => "YouTube video content download (GET)"
-   "6" => "Generic FLV or MP4 video download (GET)"
-   "7" => "Vimeo video content download (GET)"
-   "8" => "Wikipedia (GET)"
-   "9" => "RapidShare file download (GET)"
-   "10" => "MegaUpload file download (GET)"
-   "11" => "Facebook-related connections (GET/POST)"
-   "12" => "Site advertisement (GET)"
-   "13" => "Flickr photo download (GET)"
-   "14" => "GoogleMaps images (GET)"
-   "15" => "Netflix video streaming (GET)"
-   "16" => "YouTube site content download (GET)"
-   "17" => "Localized social-networking (GET/POST) 1"
-   "18" => "Generic FLV video download (GET) 2"
-   "19" => "MediaFire file download (GET)"
-   "20" => "Hotfile.com file download (GET)"
-   "21" => "Storage.to file download (GET)"
-   "22" => "YouTube \"pre-loading\" (GET) 3"
-   "23" => "YouTube \"pre-loading\" and video (GET) 3"
-   "24" => "YouTube: video request on YouTube site (GET) 4"
-   "25" => "YouTube: embedded video request (GET) 4"
-   "26" => "Twitter unencrypted traffic (GET/POST) 5"
-   "27" => "Dropbox presence traffic (GET) 6"
-    }
-   fallback => "Undefined"
-   }
- }
- if [p2p_t] {
- translate {
-    field => "[p2p_t]"
-    destination => "[p2p_type]"
+    if [munate] and [capture_interface] {
+      date {
+        match => ["date", "YYYY_MM_dd_HH_mm"]
+        target => "date"
+      }
+    
+    # The 60 we multiple by is for the new capture interval time.
+    ruby {
+      code => "
+          event.set('unix_time', event.get('date').to_i)
+          event.set('timstamp', (60 * event.get('munate').to_i) + event.get('unix_time'))"
+          }
+      }
+  
+  mutate {
+    convert => [
+      "s_port", "integer",
+      "c_port", "integer",
+      "timestamp_s", "integer",
+      "time_abs", "integer",
+      "munate", "integer",
+      "value", "integer",
+      "count", "integer",
+      "c_pkts_all", "integer",
+      "c_rst_cnt", "integer",
+      "c_ack_cnt", "integer",
+      "c_ack_cnt_p", "integer",
+      "c_bytes_uniq", "integer",
+      "c_pkts_data", "integer",
+      "c_bytes_all", "integer",
+      "c_pkts_retx", "integer",
+      "c_bytes_retx", "integer",
+      "c_pkts_ooo", "integer",
+      "c_syn_cnt", "integer",
+      "c_fin_cnt", "integer",
+      "s_pkts_all", "integer",
+      "s_rst_cnt", "integer",
+      "s_ack_cnt", "integer",
+      "s_ack_cnt_p", "integer",
+      "s_bytes_uniq", "integer",
+      "s_pkts_data", "integer",
+      "s_bytes_all", "integer",
+      "s_pkts_retx", "integer",
+      "s_bytes_retx", "integer",
+      "s_pkts_ooo", "integer",
+      "s_syn_cnt", "integer",
+      "s_fin_cnt", "integer",
+      "first", "integer",
+      "last", "integer",
+      "durat", "integer",
+      "c_first", "integer",
+      "s_first", "integer",
+      "c_last", "integer",
+      "s_last", "integer",
+      "c_first_ack", "integer",
+      "s_first_ack", "integer",
+      "c_isint", "integer",
+      "s_isint", "integer",
+      "c_iscrypto", "integer",
+      "s_iscrypto", "integer",
+      "con_t", "integer",
+      "p2p_t", "integer",
+      "http_t", "integer",
+      "c_rtt_avg", "integer",
+      "c_rtt_min", "integer",
+      "c_rtt_max", "integer",
+      "c_rtt_std", "integer",
+      "c_rtt_cnt", "integer",
+      "c_ttl_min", "integer",
+      "c_ttl_max", "integer",
+      "s_rtt_avg", "integer",
+      "s_rtt_min", "integer",
+      "s_rtt_max", "integer",
+      "s_rtt_std", "integer",
+      "s_rtt_cnt", "integer",
+      "s_ttl_min", "integer",
+      "s_ttl_max", "integer",
+      "p2p_st", "integer",
+      "ed2k_data", "integer",
+      "ed2k_sig", "integer",
+      "ed2k_c2s", "integer",
+      "ed2k_c2c", "integer",
+      "ed2k_chat", "integer",
+      "c_f1323_opt", "integer",
+      "c_tm_opt", "integer",
+      "c_win_scl", "integer",
+      "c_sack_opt", "integer",
+      "c_sack_cnt", "integer",
+      "c_mss", "integer",
+      "c_mss_max", "integer",
+      "c_mss_min", "integer",
+      "c_win_max", "integer",
+      "c_win_min", "integer",
+      "c_win_0", "integer",
+      "c_cwin_max", "integer",
+      "c_cwin_min", "integer",
+      "c_cwin_ini", "integer",
+      "c_pkts_rto", "integer",
+      "c_pkts_fs", "integer",
+      "c_pkts_reor", "integer",
+      "c_pkts_dup", "integer",
+      "c_pkts_unk", "integer",
+      "c_pkts_fc", "integer",
+      "c_pkts_unrto", "integer",
+      "c_pkts_unfs", "integer",
+      "c_syn_retx", "integer",
+      "s_f1323_opt", "integer",
+      "s_tm_opt", "integer",
+      "s_win_scl", "integer",
+      "s_sack_opt", "integer",
+      "s_sack_cnt", "integer",
+      "s_mss", "integer",
+      "s_mss_max", "integer",
+      "s_mss_min", "integer",
+      "s_win_max", "integer",
+      "s_win_min", "integer",
+      "s_win_0", "integer",
+      "s_cwin_max", "integer",
+      "s_cwin_min", "integer",
+      "s_cwin_ini", "integer",
+      "s_pkts_rto", "integer",
+      "s_pkts_fs", "integer",
+      "s_pkts_reor", "integer",
+      "s_pkts_dup", "integer",
+      "s_pkts_unk", "integer",
+      "s_pkts_fc", "integer",
+      "s_pkts_unrto", "integer",
+      "s_pkts_unfs", "integer",
+      "s_syn_retx", "integer",
+      "http_req_cnt", "integer",
+      "http_res_cnt", "integer",
+      "http_res", "integer",
+      "c_pkts_push", "integer",
+      "s_pkts_push", "integer",
+      "c_last_handshakeT", "integer",
+      "s_last_handshakeT", "integer",
+      "req_tm", "integer",
+      "res_tm", "integer"
+    ]
+  }
+  if [http_t] {
+  translate {
+    field => "[http_t]"
+    destination => "[http_type]"
     dictionary => {
-    "1" => "eMule"
-    "2" => "Kazaa Data"
-    "3" => "Ed2k Data"
-    "4" => "DirectConnect++ Data"
-    "5" => "DirectConnect++"
-    "6" => "Gnutella Data"
-    "7" => "Gnutella"
-    "8" => "Kazaa"
-    "9" => "BitTorrent"
-    "10" => "Apple"
-    "11" => "SoulSeek"
-    "12" => "WinMX"
-    "13" => "Ares"
-    "14" => "Mute"
-    "15" => "Waste"
-    "16" => "XDCC"
-    "17" => "eMule KAD"
-    "18" => "Adunanza (eMule mod)"
-     }
+    "1" => "Unclassified GET command"
+    "2" => "Unclassified POST command"
+    "3" => "MSN Chat command tunneled over HTTP (POST)"
+    "4" => "RTMPT - RTMP over HTTP Tunnel (POST)"
+    "5" => "YouTube video content download (GET)"
+    "6" => "Generic FLV or MP4 video download (GET)"
+    "7" => "Vimeo video content download (GET)"
+    "8" => "Wikipedia (GET)"
+    "9" => "RapidShare file download (GET)"
+    "10" => "MegaUpload file download (GET)"
+    "11" => "Facebook-related connections (GET/POST)"
+    "12" => "Site advertisement (GET)"
+    "13" => "Flickr photo download (GET)"
+    "14" => "GoogleMaps images (GET)"
+    "15" => "Netflix video streaming (GET)"
+    "16" => "YouTube site content download (GET)"
+    "17" => "Localized social-networking (GET/POST) 1"
+    "18" => "Generic FLV video download (GET) 2"
+    "19" => "MediaFire file download (GET)"
+    "20" => "Hotfile.com file download (GET)"
+    "21" => "Storage.to file download (GET)"
+    "22" => "YouTube \"pre-loading\" (GET) 3"
+    "23" => "YouTube \"pre-loading\" and video (GET) 3"
+    "24" => "YouTube: video request on YouTube site (GET) 4"
+    "25" => "YouTube: embedded video request (GET) 4"
+    "26" => "Twitter unencrypted traffic (GET/POST) 5"
+    "27" => "Dropbox presence traffic (GET) 6"
+      }
     fallback => "Undefined"
     }
   }
-
-  if [con_type] {
+  if [p2p_t] {
   translate {
-     field => "[con_type]"
-     destination => "[con_type]"
-     dictionary => {
-     "0" => "Unknown protocol"
-     "1" => "HTTP protocol"
-     "2" => "RTSP protocol"
-     "4" => "RTP protocol"
-     "8" => "ICY protocol"
-     "16" => "RTCP protocol"
-     "32" => "MSN protocol"
-     "64" => "YMSG protocol"
-     "128" => "XMPP protocol"
-     "256" => "P2P protocol"
-     "512" => "SKYPE protocol"
-     "1024" => "SMTP protocol"
-     "2048" => "POP3 protocol"
-     "4096" => "IMAP4 protocol"
-     "8192" => "TLS/TLS protocol"
-     "16384" => "ED2K protocol (obfuscated)"
-     "32768" => "SSH 2.0/1.99 protocol"
-     "65536" => "RTMP protocol"
-     "131072" => "Bittorrent MSE/PE protocol"
+      field => "[p2p_t]"
+      destination => "[p2p_type]"
+      dictionary => {
+      "1" => "eMule"
+      "2" => "Kazaa Data"
+      "3" => "Ed2k Data"
+      "4" => "DirectConnect++ Data"
+      "5" => "DirectConnect++"
+      "6" => "Gnutella Data"
+      "7" => "Gnutella"
+      "8" => "Kazaa"
+      "9" => "BitTorrent"
+      "10" => "Apple"
+      "11" => "SoulSeek"
+      "12" => "WinMX"
+      "13" => "Ares"
+      "14" => "Mute"
+      "15" => "Waste"
+      "16" => "XDCC"
+      "17" => "eMule KAD"
+      "18" => "Adunanza (eMule mod)"
       }
-     fallback => "Undefined"
-     }
-   }
-if [first] {
-date {
-  match => ["first", "UNIX_MS", "UNIX"]
-  }
- }
- if [timestamp_s] {
- date {
-   match => ["timestamp_s", "UNIX_MS", "UNIX"]
+      fallback => "Undefined"
+      }
+    }
+
+    if [con_type] {
+    translate {
+      field => "[con_type]"
+      destination => "[con_type]"
+      dictionary => {
+      "0" => "Unknown protocol"
+      "1" => "HTTP protocol"
+      "2" => "RTSP protocol"
+      "4" => "RTP protocol"
+      "8" => "ICY protocol"
+      "16" => "RTCP protocol"
+      "32" => "MSN protocol"
+      "64" => "YMSG protocol"
+      "128" => "XMPP protocol"
+      "256" => "P2P protocol"
+      "512" => "SKYPE protocol"
+      "1024" => "SMTP protocol"
+      "2048" => "POP3 protocol"
+      "4096" => "IMAP4 protocol"
+      "8192" => "TLS/TLS protocol"
+      "16384" => "ED2K protocol (obfuscated)"
+      "32768" => "SSH 2.0/1.99 protocol"
+      "65536" => "RTMP protocol"
+      "131072" => "Bittorrent MSE/PE protocol"
+        }
+      fallback => "Undefined"
+      }
+    }
+  if [first] and "tcp_complete" in [fields][event_type]{
+  date {
+    match => ["first", "UNIX_MS", "UNIX"]
     }
   }
-  if [time_abs] {
+  if [timestamp_s] and "udp_complete" in [fields][event_type] {
   date {
-    match => ["time_abs", "UNIX_MS", "UNIX"]
-     }
+    match => ["timestamp_s", "UNIX_MS", "UNIX"]
+      }
+    }
+    if [time_abs] and "http_complete" in [fields][event_type]{
+    date {
+      match => ["time_abs", "UNIX_MS", "UNIX"]
+      }
+    }
+    if [timestamp] and "histogram" in [fields][event_type]{
+    date {
+      match => ["timestamp", "UNIX_MS", "UNIX"]
+      }
+    }
+  # Remove filebeats default fields.
+  mutate {
+    remove_field => [
+      "log",
+      "source",
+      "tags",
+      "host",
+      "input",
+      "beat",
+      "prospector",
+      "message",
+      "time_abs",
+      "timstamp",
+      "s_first_abs",
+      "unix_time"
+    ]
   }
-  if [timestamp] {
-  date {
-    match => ["timestamp", "UNIX_MS", "UNIX"]
-     }
   }
-# Remove filebeats default fields.
-mutate {
-  remove_field => [
-    "log",
-    "source",
-    "tags",
-    "host",
-    "input",
-    "beat",
-    "prospector"
-  ]
-}
-}
 
-output {
-  stdout { codec => rubydebug }
-  #  elasticsearch {
-  #    hosts => ["http://localhost:9200"]
-  #    index => "%{[@metadata][beat]}-%{[@metadata][version]}"
-  #  }
-}
+  output {
+    stdout { codec => rubydebug }
+      elasticsearch {
+        hosts => ["http://localhost:9200"]
+        #hosts => ["196.9.88.116:9200", "196.9.88.117:9200", "196.9.88.118:9200"]
+        index => "logstash-%{[fields][tstat_type]}-%{+YYYY.MM.dd}"
+      }
+  }
