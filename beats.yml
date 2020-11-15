@@ -131,6 +131,13 @@
           event.set('timstamp', (60 * event.get('munate').to_i) + event.get('unix_time'))"
           }
       }
+# Calculate DNS Response Time from tcp complete data.
+    if [res_tm] and [req_tm] {
+        ruby {
+      code => "
+          event.set('dns_res_tm', (60 * event.get('res_tm').to_i) - event.get('req_tm'))"
+          }
+      }
   
   mutate {
     convert => [
