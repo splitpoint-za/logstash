@@ -135,7 +135,7 @@
     if [res_tm] and [req_tm] {
         ruby {
       code => "
-          event.set('dns_res_tm', (60 * event.get('res_tm').to_i) - event.get('req_tm'))"
+          event.set('dns_res_tm', event.get('res_tm').to_i - event.get('req_tm').to_i)"
           }
       }
   
@@ -143,6 +143,7 @@
     convert => [
       "s_port", "integer",
       "c_port", "integer",
+      "dns_res_tm", "integer",
       "timestamp_s", "integer",
       "time_abs", "integer",
       "munate", "integer",

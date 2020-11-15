@@ -149,6 +149,7 @@ if [alert_message] {
     hosts => ["196.9.88.116:9200", "196.9.88.117:9200", "196.9.88.118:9200"]
     document_id => "%{[@metadata][tsprefix]}%{[@metadata][fingerprint]}"
    }
+  pipeline { send_to => [alertPipeline] }
 #  stdout{codec=>rubydebug}
  }
 #    influxdb {                                                                                                                                                                                
