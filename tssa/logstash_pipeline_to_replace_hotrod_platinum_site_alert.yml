@@ -45,6 +45,8 @@ else if "0" in [ok] {
     add_field => { "[@timestamp_logstash]" => "%{[@timestamp]}" }
     add_field => { "uuid" => "%{bu_code}-%{interface}-%{epoch_millis}" }
     add_field => { "hostname" => "%{sitename}" }
+    add_field => { "client" => "PLATINUM" }
+    add_field => { "alert_type" => "site_updown" }
   }
 
 date {

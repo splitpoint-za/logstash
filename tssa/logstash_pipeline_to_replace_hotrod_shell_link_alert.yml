@@ -128,6 +128,8 @@ if [msg_temp]{
     add_field => { "uuid" => "%{bu_code}-%{link}-%{epoch_millis}" }
     add_field => { "alert_message" => "%{sitename}-%{bu_code}-%{msg_temp}" }
     add_field => { "hostname" => "%{sitename}-%{bu_code}" }
+    add_field => { "client" => "SHELL" }
+    add_field => { "alert_type" => "link_updown" }
   }
 }
 fingerprint {
