@@ -11,7 +11,8 @@
     break_on_match => false
     match => [
             # filter for UDP Complete logs.
-            "message", "^(?<c_ip>[^\s]+)\s+(?<c_port>[^\s]+)\s+(?<c_first_abs>[^\s]+)\s+(?<c_durat>[^\s]+)\s+(?<c_bytes_all>[^\s]+)\s+(?<c_pkts_all>[^\s]+)\s+(?<c_isint>[^\s]+)\s+(?<c_iscrypto>[^\s]+)\s+(?<c_type>[^\s]+)\s+(?<s_ip>[^\s]+)\s+(?<s_port>[^\s]+)\s+(?<s_first_abs>[^\s]+)\s+(?<s_durat>[^\s]+)\s+(?<s_bytes_all>[^\s]+)\s+(?<s_pkts_all>[^\s]+)\s+(?<s_isint>[^\s]+)\s+(?<s_iscrypto>[^\s]+)\s+(?<s_type>[^\s]+)\s+(?<fqdn>[^\s]+)\s+(?<quic_sni>[^\s]+)\s+(?<quic_ua>[^\s]+)\s+(?<quic_chlo>[^\s]+)\s+(?<quic_rej>[^\s]+)$"
+            "message", "^(?<c_ip>[^\s]+)\s+(?<c_port>[^\s]+)\s+(?<c_first_abs>[^\s]+)\s+(?<c_durat>[^\s]+)\s+(?<c_bytes_all>[^\s]+)\s+(?<c_pkts_all>[^\s]+)\s+(?<c_isint>[^\s]+)\s+(?<c_iscrypto>[^\s]+)\s+(?<c_type>[^\s]+)\s+(?<s_ip>[^\s]+)\s+(?<s_port>[^\s]+)\s+(?<s_first_abs>[^\s]+)\s+(?<s_durat>[^\s]+)\s+(?<s_bytes_all>[^\s]+)\s+(?<s_pkts_all>[^\s]+)\s+(?<s_isint>[^\s]+)\s+(?<s_iscrypto>[^\s]+)\s+(?<s_type>[^\s]+)\s+(?<fqdn>[^\s]+)\s+(?<quic_sni>[^\s]+)\s+(?<quic_ua>[^\s]+)\s+(?<quic_chlo>[^\s]+)\s+(?<quic_rej>[^\s]+)$",
+            "message", "^(?<c_ip>[^\s]+)\s(?<c_port>[^\s]+)\s(?<c_first_abs>[^\s]+)\s(?<c_durat>[^\s]+)\s(?<c_bytes_all>[^\s]+)\s(?<c_pkts_all>[^\s]+)\s(?<c_isint>[^\s]+)\s(?<c_iscrypto>[^\s]+)\s(?<c_type>[^\s]+)\s(?<s_ip>[^\s]+)\s(?<s_port>[^\s]+)\s(?<s_first_abs>[^\s]+)\s(?<s_durat>[^\s]+)\s(?<s_bytes_all>[^\s]+)\s(?<s_pkts_all>[^\s]+)\s(?<s_isint>[^\s]+)\s(?<s_iscrypto>[^\s]+)\s(?<s_type>[^\s]+)\s(?<fqdn>[^\n]+)$"
             ]
       
     }
@@ -369,6 +370,23 @@
       match => ["timestamp", "UNIX_MS", "UNIX"]
       }
     }
+
+  # Rename the critical fields.
+  if [fields][client] {
+    mutate {
+       add_field => {"client" => "%{[fields][client]}"}
+     }
+  }
+  if [fields][siteName] {
+    mutate {
+     add_field => {"siteName" => "%{[fields][siteName]}"}
+     }
+  }
+  if [fields][tenant] {
+    mutate {
+     add_field => {"tenant" => "%{[fields][tenant]}"}
+     }
+  }
   # Remove filebeats default fields.
   mutate {
     remove_field => [
@@ -383,7 +401,10 @@
       "time_abs",
       "timstamp",
       "s_first_abs",
-      "unix_time"
+      "unix_time",
+      "[fields][siteName]",
+      "[fields][client]",
+      "[fields][tenant]"
     ]
   }
   }
