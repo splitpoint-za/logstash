@@ -1,0 +1,50 @@
+input {
+  http {
+   port => "8080"
+     codec => multiline{
+      pattern => '^{'
+      negate => true
+      what => previous
+  }
+ }
+}
+filter {
+  json {
+    source => "message"
+    remove_field => [message, "[headers]"]
+  }
+if [packetLossPercentage] {
+  mutate {
+    gsub => [
+      "packetLossPercentage", "%", " "
+        ]
+  }
+}
+mutate {
+  convert => [
+    "allPacketsAverageLatency", "float",
+    "averageJitter", "float",
+    "bestPacketLatency", "float",
+    "droppedPackets", "float",
+    "geometricMeanOfPacketLatency", "float",
+    "hopeNumber", "integer",
+    "lastPacketLatencyr", "float",
+    "maximumJitter", "float",
+    "minimumJitter", "float",
+    "packetInterArrivalJitter", "float",
+    "packetLossPercentage", "float",
+    "sentPackets", "integer",
+    "standardDeviationOfPacketLatency", "float",
+    "worstPacketLatency", "float" 
+    ]
+ }
+}
+output {
+  stdout { codec => rubydebug }
+  elasticsearch {
+    hosts => ["http://localhost:9200"]
+    #hosts => ["196.9.88.116:9200", "196.9.88.117:9200", "196.9.88.118:9200"]
+    index => "fluentd-advance-traceroute-%{+YYYY.MM.dd}"
+  }
+}
+

@@ -1,0 +1,25 @@
+input {
+  exec {
+    command => "./bin/mtr.sh"
+    interval => 30
+    codec => multiline{
+      pattern => '^{'
+      negate => true
+      what => previous
+    }
+  }
+}
+filter {
+  json {
+    source => "message"
+    remove_field => message
+  }
+}
+output {
+  stdout { codec => rubydebug }
+  elasticsearch {
+    hosts => ["http://localhost:9200"]
+    #hosts => ["196.9.88.116:9200", "196.9.88.117:9200", "196.9.88.118:9200"]
+    index => "logstash-advance-traceroute-%{+YYYY.MM.dd}"
+  }
+}

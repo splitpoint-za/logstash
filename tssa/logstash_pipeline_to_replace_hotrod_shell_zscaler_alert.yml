@@ -46,6 +46,8 @@ else if "0" in [ok] {
     add_field => { "[@timestamp_logstash]" => "%{[@timestamp]}" }
     add_field => { "uuid" => "%{bu_code}-%{epoch_millis}" }
     add_field => { "hostname" => "%{sitename}" }
+    add_field => { "client" => "SHELL" }
+    add_field => { "alert_type" => "zscaler_updown" }
   }
 
 date {
@@ -148,8 +150,6 @@ if [alert_message] {
     index => "logstash-shell-alert-zscaler-%{+YYYY.MM.dd}"
     hosts => ["196.9.88.116:9200", "196.9.88.117:9200", "196.9.88.118:9200"]
     document_id => "%{[@metadata][tsprefix]}%{[@metadata][fingerprint]}"
-    add_field => { "client" => "SHELL" }
-    add_field => { "alert_type" => "zscaler_updown" }
    }
   pipeline { send_to => [alertPipeline] }
 #  stdout{codec=>rubydebug}
