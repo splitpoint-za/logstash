@@ -1,6 +1,6 @@
 input {
   exec {
-    command => "./bin/mtr.sh"
+    command => "/home/vhutshilo/github/logstash/testFiles/bin/mtr.sh"
     interval => 30
     codec => multiline{
       pattern => '^{'
@@ -12,14 +12,50 @@ input {
 filter {
   json {
     source => "message"
-    remove_field => message
+    remove_field => ["message", "command"]
   }
+if [packetLossPercentage] {
+  mutate {
+    gsub => [
+      "packetLossPercentage", "%", " "
+        ]
+  }
+ }
+ mutate {
+  convert => [
+    "allPacketsAverageLatency", "float",
+    "averageJitter", "float",
+    "bestPacketLatency", "float",
+    "droppedPackets", "float",
+    "geometricMeanOfPacketLatency", "float",
+    "hopNumber", "integer",
+    "lastPacketLatency", "float",
+    "maximumJitter", "float",
+    "minimumJitter", "float",
+    "packetInterArrivalJitter", "float",
+    "packetLossPercentage", "float",
+    "sentPackets", "integer",
+    "standardDeviationOfPacketLatency", "float",
+    "worstPacketLatency", "float" 
+    ]
+ }
 }
 output {
-  stdout { codec => rubydebug }
+#  stdout { codec => rubydebug }
   elasticsearch {
     hosts => ["http://localhost:9200"]
     #hosts => ["196.9.88.116:9200", "196.9.88.117:9200", "196.9.88.118:9200"]
     index => "logstash-advance-traceroute-%{+YYYY.MM.dd}"
   }
+influxdb {                                                                                                                                                                                
+  host => "localhost"                                                                                                                                                                      
+  port => 8086                                                                                                                                                                              
+  ssl => "false"                                                                                                                                                                            
+  db => "advanceTraceRoute"                                                                                                                                                                          
+  codec => "json"                                                                                                                                                                          
+  send_as_tags => ["host", "destinationAddress", "targer" ]                                                                                                                              
+  use_event_fields_for_data_points => true
+  data_points => {}
+  exclude_fields => ["@timestamp", "@version", "type", "tags", "host"]
+ }
 }
