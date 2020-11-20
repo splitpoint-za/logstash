@@ -5,7 +5,31 @@
   }
 
   filter {
-    if "udp_complete" in [fields][tstat_type] {
+  if "tstat_complete" in [fields][tstat_type] {
+    grok {
+    tag_on_failure => []
+    break_on_match => false
+    match => [
+            "source", "(?<tstat_type>[^\/]+)$",
+            "message", "^#(?<header>.*)"
+            ]
+    remove_field => ["[fields][tstat_type]"]
+  }
+ }
+ if [header] {
+   drop {}
+ }
+if [tstat_type] {
+    grok {
+    tag_on_failure => []
+    break_on_match => false
+    match => [
+            "tstat_type", "log_(?<[fields][tstat_type]>.*)$"
+            ]
+
+  }
+ }
+    if "log_udp_complete" in [tstat_type] {
     grok {
     tag_on_failure => []
     break_on_match => false
@@ -17,7 +41,7 @@
       
     }
     }
-    if "tcp_complete" in [fields][tstat_type] {
+    if "log_tcp_complete" in [tstat_type] {
     grok {
     tag_on_failure => []
     break_on_match => false
@@ -29,7 +53,7 @@
             }
     } 
 
-    if "tcp_none_complete" in [fields][tstat_type] {
+    if "log_tcp_nocomplete" in [tstat_type] {
     grok {
     tag_on_failure => []
     break_on_match => false
@@ -42,7 +66,7 @@
     }
 
     
-    if "http_complete" in [fields][tstat_type] {    
+    if "log_http_complete" in [tstat_type] {    
     grok {
     tag_on_failure => []
     break_on_match => false
@@ -53,7 +77,7 @@
               ]
     }
     }
-    if "histogram" in [fields][tstat_type] {  
+    if "histogram" in [tstat_type] {  
     grok {
     tag_on_failure => []
     break_on_match => false
@@ -67,16 +91,16 @@
     }
 
     # Delete headers of tcp, udp, http, mm,video,chat complete and histogram headers.
-  if ![value] and "histogram" in [fields][tstat_type] {
+  if ![value] and "histogram" in [tstat_type] {
     drop {}
   } 
- # if ![c_first_abs] and "udp_complete" in [fields][tstat_type]  {
+ # if ![c_first_abs] and "udp_complete" in [tstat_type]  {
   #  drop {}
   #} 
-  if ![c_ip] and "tcp_complete" in [fields][tstat_type] {
+  if ![c_ip] and "log_tcp_complete" in [tstat_type] {
     drop {}
   }
- # if "http_hostname:131" in [http_hostname] and "tcp_none_complete" in [fields][tstat_type] {
+ # if "http_hostname:131" in [http_hostname] and "tcp_none_complete" in [tstat_type] {
  #   drop {}
  # }
 
@@ -358,22 +382,22 @@
       fallback => "Undefined"
       }
     }
-  if [first] and "tcp_complete" in [fields][event_type]{
+  if [first] and "log_tcp_complete" in [tstat_type]{
   date {
     match => ["first", "UNIX_MS", "UNIX"]
     }
   }
-  if [timestamp_s] and "udp_complete" in [fields][event_type] {
+  if [timestamp_s] and "log_udp_complete" in [tstat_type] {
   date {
     match => ["timestamp_s", "UNIX_MS", "UNIX"]
       }
     }
-    if [time_abs] and "http_complete" in [fields][event_type]{
+    if [time_abs] and "log_http_complete" in [tstat_type]{
     date {
-      match => ["time_abs", "UNIX_MS", "UNIX"]
+      match => ["time_abs", "UNIX", "UNIX_MS"]
       }
     }
-    if [timestamp] and "histogram" in [fields][event_type]{
+    if [timestamp] and "histogram" in [tstat_type]{
     date {
       match => ["timestamp", "UNIX_MS", "UNIX"]
       }
@@ -406,22 +430,28 @@
       "beat",
       "prospector",
       "message",
-      "time_abs",
       "timstamp",
       "s_first_abs",
       "unix_time",
-      "[fields][siteName]",
-      "[fields][client]",
-      "[fields][tenant]"
+      "[fields]"
     ]
   }
+    if [tstat_type] {
+    grok {
+    tag_on_failure => []
+    break_on_match => false
+    match => [
+            "tstat_type", "log_(?<[fields][tstat_type]>.*)$"
+            ]
+  }
+ }
   }
 
   output {
     stdout { codec => rubydebug }
-      elasticsearch {
-        hosts => ["http://localhost:9200"]
-        #hosts => ["196.9.88.116:9200", "196.9.88.117:9200", "196.9.88.118:9200"]
-        index => "logstash-%{[fields][tstat_type]}-%{+YYYY.MM.dd}"
-      }
+#      elasticsearch {
+#        hosts => ["http://localhost:9200"]
+#        hosts => ["196.9.88.116:9200", "19tstat_type6.9.88.117:9200", "196.9.88.118:9200"]
+#        index => "logstash-%{[tstat_type]}-%{+YYYY.MM.dd}"
+#      }
   }
